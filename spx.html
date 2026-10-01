@@ -92,17 +92,14 @@ async function fetchSpxPrice() {
     const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
     
     const response = await fetch(proxyUrl);
-    if (!response.ok) throw new Error('Network response failed');
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
     
     const wrapper = await response.json();
-    const data = JSON.parse(wrapper.contents); // AllOrigins returns JSON string in .contents
+    const data = JSON.parse(wrapper.contents);
+    const currentPrice = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
     
-    const result = data?.chart?.result?.[0];
-    const currentPrice = result?.meta?.regularMarketPrice;
-    
-    if (!currentPrice) throw new Error('Price data missing from API response');
+    if (!currentPrice) throw new Error('Price data missing');
 
-    // Update UI elements
     priceElement.textContent = formatter.format(currentPrice);
     level150Element.textContent = formatter.format(currentPrice * 0.985);
     level175Element.textContent = formatter.format(currentPrice * 0.9825);
