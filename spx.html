@@ -84,19 +84,19 @@
             }
             ctx.stroke();
         }
-
 async function fetchSpxPrice() {
   try {
     statusElement.textContent = 'Updating...';
     
-    // Direct Yahoo Finance v8 chart API endpoint for S&P 500 (^GSPC)
     const targetUrl = 'https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?interval=1m&range=1d';
-    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
     
     const response = await fetch(proxyUrl);
     if (!response.ok) throw new Error('Network response failed');
     
-    const data = await response.json();
+    const wrapper = await response.json();
+    const data = JSON.parse(wrapper.contents); // AllOrigins returns JSON string in .contents
+    
     const result = data?.chart?.result?.[0];
     const currentPrice = result?.meta?.regularMarketPrice;
     
