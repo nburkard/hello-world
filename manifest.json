@@ -1,0 +1,9 @@
+{
+  "name": "SPX Drop Tracker",
+  "short_name": "SPX Tracker",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme-color": "#111827",
+  "orientation": "portrait"
+}
