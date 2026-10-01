@@ -85,44 +85,42 @@
             ctx.stroke();
         }
 
-        async function fetchSpxPrice() {
-            try {
-                statusElement.textContent = 'Updating...';
-                
-                const targetUrl = 'https://yahoo.com';
-                
-                // Using an edge-optimized corsproxy string assembly rule layout
-                const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
-                
-                console.log("[TRACKER-V5-FETCH] Outbound URL generated: ", proxyUrl);
-                
-                const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error('Network status bad');
-                
-                const data = await response.json();
-                const currentPrice = data.chart.result[0].meta.regularMarketPrice;
+async function fetchSpxPrice() {
+  try {
+    statusElement.textContent = 'Updating...';
+    
+    // Direct Yahoo Finance v8 chart API endpoint for S&P 500 (^GSPC)
+    const targetUrl = 'https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?interval=1m&range=1d';
+    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
+    
+    const response = await fetch(proxyUrl);
+    if (!response.ok) throw new Error('Network response failed');
+    
+    const data = await response.json();
+    const result = data?.chart?.result?.[0];
+    const currentPrice = result?.meta?.regularMarketPrice;
+    
+    if (!currentPrice) throw new Error('Price data missing from API response');
 
-                if (!currentPrice) throw new Error('Payload contents parsing missing parameters');
+    // Update UI elements
+    priceElement.textContent = formatter.format(currentPrice);
+    level150Element.textContent = formatter.format(currentPrice * 0.985);
+    level175Element.textContent = formatter.format(currentPrice * 0.9825);
+    level200Element.textContent = formatter.format(currentPrice * 0.98);
 
-                // Update interface components
-                priceElement.textContent = formatter.format(currentPrice);
-                level150Element.textContent = formatter.format(currentPrice * 0.985);
-                level175Element.textContent = formatter.format(currentPrice * 0.9825);
-                level200Element.textContent = formatter.format(currentPrice * 0.98);
+    const now = new Date();
+    timestampElement.textContent = now.toTimeString().split(' ')[0];
+    statusElement.textContent = 'Live';
 
-                const now = new Date();
-                timestampElement.textContent = now.toTimeString().split(' ');
-                statusElement.textContent = 'Live';
-
-                priceHistory.push(currentPrice);
-                if (priceHistory.length > maxHistoryLength) priceHistory.shift();
-                drawSparkline();
-            } catch (e) {
-                console.error("[TRACKER-V5-ERROR] Execution aborted: ", e);
-                statusElement.textContent = 'Network Retry...';
-            }
-        }
-
+    priceHistory.push(currentPrice);
+    if (priceHistory.length > maxHistoryLength) priceHistory.shift();
+    drawSparkline();
+  } catch (e) {
+    console.error("[TRACKER-V5-ERROR] Fetch failed: ", e);
+    statusElement.textContent = 'Network Retry...';
+  }
+}
+        
         fetchSpxPrice();
         setInterval(fetchSpxPrice, 10000);
     </script>
