@@ -95,17 +95,17 @@
         }
         ctx.stroke();
     }
-
 async function fetchSpxPrice() {
     try {
         statusElement.textContent = 'Updating...';
         
-        // Target index quote tracking address
+        // Target Yahoo Finance endpoint
         const targetUrl = 'https://yahoo.com';
         
-        // Corrected template literal structure mapping to the AllOrigins mirror proxy
-     const response = await fetch('https://allorigins.win' + encodeURIComponent('https://yahoo.com'));
-
+        // The fully corrected public proxy URL routing format
+        const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
+        
+        const response = await fetch(proxyUrl);
         if (!response.ok) throw new Error();
         
         const wrapper = await response.json();
@@ -114,14 +114,14 @@ async function fetchSpxPrice() {
 
         if (!currentPrice) throw new Error();
 
-        // Target outputs update block
+        // Display formatted math tiers
         priceElement.textContent = formatter.format(currentPrice);
         level150Element.textContent = formatter.format(currentPrice * 0.985);
         level175Element.textContent = formatter.format(currentPrice * 0.9825);
         level200Element.textContent = formatter.format(currentPrice * 0.98);
 
         const now = new Date();
-        timestampElement.textContent = now.toTimeString().split(' ');
+        timestampElement.textContent = now.toTimeString().split(' ')[0];
         statusElement.textContent = 'Live';
 
         priceHistory.push(currentPrice);
