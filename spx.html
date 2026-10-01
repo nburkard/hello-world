@@ -87,13 +87,12 @@
             try {
                 statusElement.textContent = 'Updating...';
                 
-                // Pure clean target address string 
-                const rawUrl = 'https://yahoo.com';
+                const targetUrl = 'https://yahoo.com';
                 
-                // Formulated full proxy route string structure
-                const proxyRoute = 'https://allorigins.win' + encodeURIComponent(rawUrl);
+                // Explicit target path string assembly mapping to the AllOrigins mirror proxy format
+                const proxyUrl = 'https://allorigins.win' + encodeURIComponent(targetUrl);
                 
-                const response = await fetch(proxyRoute);
+                const response = await fetch(proxyUrl);
                 if (!response.ok) throw new Error();
                 
                 const wrapper = await response.json();
@@ -102,14 +101,13 @@
 
                 if (!currentPrice) throw new Error();
 
-                // Assign data metrics to DOM elements
                 priceElement.textContent = formatter.format(currentPrice);
                 level150Element.textContent = formatter.format(currentPrice * 0.985);
                 level175Element.textContent = formatter.format(currentPrice * 0.9825);
                 level200Element.textContent = formatter.format(currentPrice * 0.98);
 
                 const now = new Date();
-                timestampElement.textContent = now.toTimeString().split(' ')[0];
+                timestampElement.textContent = now.toTimeString().split(' ');
                 statusElement.textContent = 'Live';
 
                 priceHistory.push(currentPrice);
