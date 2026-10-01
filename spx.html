@@ -87,16 +87,13 @@
             try {
                 statusElement.textContent = 'Updating...';
                 
-                const targetUrl = 'https://yahoo.com';
-                
-                // Explicit target path string assembly mapping to the AllOrigins mirror proxy format
-                const proxyUrl = 'https://allorigins.win' + encodeURIComponent(targetUrl);
+                // Using an ultra-clean straightforward bypass string prefix format
+                const proxyUrl = 'https://freeboard.io';
                 
                 const response = await fetch(proxyUrl);
                 if (!response.ok) throw new Error();
                 
-                const wrapper = await response.json();
-                const data = JSON.parse(wrapper.contents);
+                const data = await response.json();
                 const currentPrice = data.chart.result[0].meta.regularMarketPrice;
 
                 if (!currentPrice) throw new Error();
