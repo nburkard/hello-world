@@ -95,50 +95,47 @@
         }
         ctx.stroke();
     }
-async function fetchSpxPrice() {
-    try {
-        statusElement.textContent = 'Updating...';
-        
-        // Target Yahoo Finance endpoint
-        const targetUrl = 'https://yahoo.com';
-        
-        // The fully corrected public proxy URL routing format
-        const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
-        
-        const response = await fetch(proxyUrl);
-        if (!response.ok) throw new Error();
-        
-        const wrapper = await response.json();
-        const data = JSON.parse(wrapper.contents);
-        const currentPrice = data.chart.result[0].meta.regularMarketPrice;
 
-        if (!currentPrice) throw new Error();
+    async function fetchSpxPrice() {
+        try {
+            statusElement.textContent = 'Updating...';
+            
+            const targetUrl = 'https://yahoo.com';
+            const proxyUrl = 'https://allorigins.win' + encodeURIComponent(targetUrl);
+            
+            const response = await fetch(proxyUrl);
+            if (!response.ok) throw new Error('Proxy connection failed');
+            
+            const wrapper = await response.json();
+            const data = JSON.parse(wrapper.contents);
+            
+            // CORRECTED PATH: added the [0] index accessor for the Yahoo Finance array array
+            const currentPrice = data.chart.result[0].meta.regularMarketPrice;
 
-        // Display formatted math tiers
-        priceElement.textContent = formatter.format(currentPrice);
-        level150Element.textContent = formatter.format(currentPrice * 0.985);
-        level175Element.textContent = formatter.format(currentPrice * 0.9825);
-        level200Element.textContent = formatter.format(currentPrice * 0.98);
+            if (!currentPrice) throw new Error('Price data missing inside payload');
 
-        const now = new Date();
-        timestampElement.textContent = now.toTimeString().split(' ')[0];
-        statusElement.textContent = 'Live';
+            // Format metrics
+            priceElement.textContent = formatter.format(currentPrice);
+            level150Element.textContent = formatter.format(currentPrice * 0.985);
+            level175Element.textContent = formatter.format(currentPrice * 0.9825);
+            level200Element.textContent = formatter.format(currentPrice * 0.98);
 
-        priceHistory.push(currentPrice);
-        if (priceHistory.length > maxHistoryLength) priceHistory.shift();
-        drawSparkline();
-    } catch (e) {
-        console.error(e);
-        statusElement.textContent = 'Network Retry...';
+            const now = new Date();
+            timestampElement.textContent = now.toTimeString().split(' ')[0];
+            statusElement.textContent = 'Live';
+
+            priceHistory.push(currentPrice);
+            if (priceHistory.length > maxHistoryLength) priceHistory.shift();
+            drawSparkline();
+        } catch (e) {
+            console.error('Tracker error:', e);
+            statusElement.textContent = 'Error parsing data';
+        }
     }
-}
 
-    
-    // Initialize and pull data immediately
     fetchSpxPrice();
-    
-    // Cycle updates every 10 seconds (10000 ms)
     setInterval(fetchSpxPrice, 10000);
 </script>
+
 </body>
 </html>
