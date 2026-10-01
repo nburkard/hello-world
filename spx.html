@@ -50,6 +50,8 @@
     </div>
 
     <script>
+        console.log("[TRACKER-V5-ONLINE] Script initialization active.");
+
         const priceElement = document.getElementById('current-price');
         const level150Element = document.getElementById('level-150');
         const level175Element = document.getElementById('level-175');
@@ -87,17 +89,22 @@
             try {
                 statusElement.textContent = 'Updating...';
                 
-                // Using an ultra-clean straightforward bypass string prefix format
-                const proxyUrl = 'https://freeboard.io';
+                const targetUrl = 'https://yahoo.com';
+                
+                // Using an edge-optimized corsproxy string assembly rule layout
+                const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
+                
+                console.log("[TRACKER-V5-FETCH] Outbound URL generated: ", proxyUrl);
                 
                 const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error();
+                if (!response.ok) throw new Error('Network status bad');
                 
                 const data = await response.json();
                 const currentPrice = data.chart.result[0].meta.regularMarketPrice;
 
-                if (!currentPrice) throw new Error();
+                if (!currentPrice) throw new Error('Payload contents parsing missing parameters');
 
+                // Update interface components
                 priceElement.textContent = formatter.format(currentPrice);
                 level150Element.textContent = formatter.format(currentPrice * 0.985);
                 level175Element.textContent = formatter.format(currentPrice * 0.9825);
@@ -111,7 +118,7 @@
                 if (priceHistory.length > maxHistoryLength) priceHistory.shift();
                 drawSparkline();
             } catch (e) {
-                console.error(e);
+                console.error("[TRACKER-V5-ERROR] Execution aborted: ", e);
                 statusElement.textContent = 'Network Retry...';
             }
         }
