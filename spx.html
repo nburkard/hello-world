@@ -2,140 +2,127 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPX Real-Time Drop Calculator</title>
-    <!-- Tailwind CSS for modern styling -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>SPX Tracker</title>
     <script src="https://tailwindcss.com"></script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#111827">
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-6">
+<body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-4 select-none">
 
-    <div class="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl p-6 w-full max-w-md">
-        <!-- Header -->
+    <div class="bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl p-6 w-full max-w-sm">
         <div class="flex justify-between items-center mb-6">
             <div>
-                <h1 class="text-2xl font-bold tracking-tight text-white">S&P 500 Index</h1>
+                <h1 class="text-xl font-bold tracking-tight text-white">S&P 500 Index</h1>
                 <p class="text-xs text-gray-400">Updates every 10 seconds</p>
             </div>
-            <span id="ticker" class="bg-blue-900 text-blue-300 text-xs font-semibold px-2.5 py-1 rounded border border-blue-700">^SPX</span>
+            <span class="bg-blue-900 text-blue-300 text-xs font-semibold px-2 py-0.5 rounded border border-blue-700">^SPX</span>
         </div>
 
-        <!-- Current Price Display -->
-        <div class="mb-6">
-            <div class="text-sm font-medium text-gray-400 uppercase tracking-wider">Current Price</div>
-            <div class="flex items-baseline space-x-2">
-                <span id="current-price" class="text-4xl font-extrabold text-green-400">Loading...</span>
-            </div>
+        <div class="mb-5">
+            <div class="text-xs font-medium text-gray-400 uppercase tracking-wider">Current Price</div>
+            <div class="text-4xl font-black text-green-400 tracking-tight" id="current-price">Loading...</div>
         </div>
 
-        <!-- Sparkline Canvas -->
-        <div class="mb-6 bg-gray-900/50 p-2 rounded-lg border border-gray-700/50">
-            <div class="text-xs text-gray-500 mb-1 text-right">Price Trend (Last 30 ticks)</div>
-            <canvas id="sparkline" width="380" height="60" class="w-full"></canvas>
+        <div class="mb-5 bg-gray-950 p-2 rounded-xl border border-gray-800">
+            <canvas id="sparkline" width="340" height="70" class="w-full"></canvas>
         </div>
 
-        <!-- Drop Threshold Calculations -->
-        <div class="space-y-3">
-            <div class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-1">Target Drop Levels</div>
-            
-            <!-- -1.5% -->
-            <div class="flex justify-between items-center bg-gray-900/40 p-3 rounded-lg border border-gray-700">
-                <span class="text-sm font-semibold text-orange-400">-1.50% Level</span>
-                <span id="level-150" class="text-lg font-bold font-mono">--</span>
+        <div class="space-y-2.5">
+            <div class="flex justify-between items-center bg-gray-900/60 p-3 rounded-xl border border-gray-700/50">
+                <span class="text-xs font-bold text-orange-400 uppercase tracking-wider">-1.50%</span>
+                <span id="level-150" class="text-base font-bold font-mono text-gray-200">--</span>
             </div>
-
-            <!-- -1.75% -->
-            <div class="flex justify-between items-center bg-gray-900/40 p-3 rounded-lg border border-gray-700">
-                <span class="text-sm font-semibold text-orange-500">-1.75% Level</span>
-                <span id="level-175" class="text-lg font-bold font-mono">--</span>
+            <div class="flex justify-between items-center bg-gray-900/60 p-3 rounded-xl border border-gray-700/50">
+                <span class="text-xs font-bold text-orange-500 uppercase tracking-wider">-1.75%</span>
+                <span id="level-175" class="text-base font-bold font-mono text-gray-200">--</span>
             </div>
-
-            <!-- -2.0% -->
-            <div class="flex justify-between items-center bg-gray-900/40 p-3 rounded-lg border border-gray-700">
-                <span class="text-sm font-semibold text-red-500">-2.00% Level</span>
-                <span id="level-200" class="text-lg font-bold font-mono">--</span>
+            <div class="flex justify-between items-center bg-gray-900/60 p-3 rounded-xl border border-gray-700/50">
+                <span class="text-xs font-bold text-red-500 uppercase tracking-wider">-2.00%</span>
+                <span id="level-200" class="text-base font-bold font-mono text-gray-200">--</span>
             </div>
         </div>
         
-        <!-- Status Indicator -->
-        <div class="mt-6 pt-4 border-t border-gray-700 flex justify-between items-center text-xs text-gray-500">
-            <span id="status">Connecting to market data...</span>
+        <div class="mt-5 pt-3 border-t border-gray-700 flex justify-between items-center text-[10px] text-gray-500 font-medium">
+            <span id="status">Connecting...</span>
             <span id="timestamp">--:--:--</span>
         </div>
     </div>
-<script>
-    const priceElement = document.getElementById('current-price');
-    const level150Element = document.getElementById('level-150');
-    const level175Element = document.getElementById('level-175');
-    const level200Element = document.getElementById('level-200');
-    const statusElement = document.getElementById('status');
-    const timestampElement = document.getElementById('timestamp');
-    const canvas = document.getElementById('sparkline');
-    const ctx = canvas.getContext('2d');
 
-    let priceHistory = [];
-    const maxHistoryLength = 25;
-    const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+    <script>
+        const priceElement = document.getElementById('current-price');
+        const level150Element = document.getElementById('level-150');
+        const level175Element = document.getElementById('level-175');
+        const level200Element = document.getElementById('level-200');
+        const statusElement = document.getElementById('status');
+        const timestampElement = document.getElementById('timestamp');
+        const canvas = document.getElementById('sparkline');
+        const ctx = canvas.getContext('2d');
 
-    function drawSparkline() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        if (priceHistory.length < 2) return;
-        const min = Math.min(...priceHistory);
-        const max = Math.max(...priceHistory);
-        const range = max - min === 0 ? 1 : max - min;
+        let priceHistory = [];
+        const maxHistoryLength = 25;
+        const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
-        ctx.beginPath();
-        ctx.strokeStyle = '#4ade80';
-        ctx.lineWidth = 2.5;
-        ctx.lineJoin = 'round';
-        for (let i = 0; i < priceHistory.length; i++) {
-            const x = (i / (maxHistoryLength - 1)) * canvas.width;
-            const y = canvas.height - ((priceHistory[i] - min) / range) * (canvas.height - 16) - 8;
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
+        function drawSparkline() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (priceHistory.length < 2) return;
+            const min = Math.min(...priceHistory);
+            const max = Math.max(...priceHistory);
+            const range = max - min === 0 ? 1 : max - min;
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#4ade80';
+            ctx.lineWidth = 2.5;
+            ctx.lineJoin = 'round';
+            for (let i = 0; i < priceHistory.length; i++) {
+                const x = (i / (maxHistoryLength - 1)) * canvas.width;
+                const y = canvas.height - ((priceHistory[i] - min) / range) * (canvas.height - 16) - 8;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
         }
-        ctx.stroke();
-    }
 
-    async function fetchSpxPrice() {
-        try {
-            statusElement.textContent = 'Updating...';
-            
-            const targetUrl = 'https://yahoo.com';
-            const proxyUrl = 'https://allorigins.win' + encodeURIComponent(targetUrl);
-            
-            const response = await fetch(proxyUrl);
-            if (!response.ok) throw new Error('Proxy connection failed');
-            
-            const wrapper = await response.json();
-            const data = JSON.parse(wrapper.contents);
-            
-            // CORRECTED PATH: added the [0] index accessor for the Yahoo Finance array array
-            const currentPrice = data.chart.result[0].meta.regularMarketPrice;
+        async function fetchSpxPrice() {
+            try {
+                statusElement.textContent = 'Updating...';
+                
+                // Pure clean target address string 
+                const rawUrl = 'https://yahoo.com';
+                
+                // Formulated full proxy route string structure
+                const proxyRoute = 'https://allorigins.win' + encodeURIComponent(rawUrl);
+                
+                const response = await fetch(proxyRoute);
+                if (!response.ok) throw new Error();
+                
+                const wrapper = await response.json();
+                const data = JSON.parse(wrapper.contents);
+                const currentPrice = data.chart.result[0].meta.regularMarketPrice;
 
-            if (!currentPrice) throw new Error('Price data missing inside payload');
+                if (!currentPrice) throw new Error();
 
-            // Format metrics
-            priceElement.textContent = formatter.format(currentPrice);
-            level150Element.textContent = formatter.format(currentPrice * 0.985);
-            level175Element.textContent = formatter.format(currentPrice * 0.9825);
-            level200Element.textContent = formatter.format(currentPrice * 0.98);
+                // Assign data metrics to DOM elements
+                priceElement.textContent = formatter.format(currentPrice);
+                level150Element.textContent = formatter.format(currentPrice * 0.985);
+                level175Element.textContent = formatter.format(currentPrice * 0.9825);
+                level200Element.textContent = formatter.format(currentPrice * 0.98);
 
-            const now = new Date();
-            timestampElement.textContent = now.toTimeString().split(' ')[0];
-            statusElement.textContent = 'Live';
+                const now = new Date();
+                timestampElement.textContent = now.toTimeString().split(' ')[0];
+                statusElement.textContent = 'Live';
 
-            priceHistory.push(currentPrice);
-            if (priceHistory.length > maxHistoryLength) priceHistory.shift();
-            drawSparkline();
-        } catch (e) {
-            console.error('Tracker error:', e);
-            statusElement.textContent = 'Error parsing data';
+                priceHistory.push(currentPrice);
+                if (priceHistory.length > maxHistoryLength) priceHistory.shift();
+                drawSparkline();
+            } catch (e) {
+                console.error(e);
+                statusElement.textContent = 'Network Retry...';
+            }
         }
-    }
 
-    fetchSpxPrice();
-    setInterval(fetchSpxPrice, 10000);
-</script>
-
+        fetchSpxPrice();
+        setInterval(fetchSpxPrice, 10000);
+    </script>
 </body>
 </html>
